@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>swiperlite</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style media="screen">
+.swiperlite{
+  width: 300px;
+  margin: 0 auto;
+  background: gray;
+  height: 500px;
+  overflow: hidden;
+}
+.ul_wrap{
+  /*width:1320px ;*/
+  width:9990px ;
+  display: flex;
+  background: yellow;
+  /*-webkit-transform: translate3d(-620px,0,0);*/
+  /*transform: translate3d(-620px,0,0);*/
+  -webkit-transition:all 0 ease;
+  transition:all 0 ease;
+}
+.ul_wrap.ttion{
+  -webkit-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+.li_item{
+  width: 220px;
+  height: 300px;
+  color: #FFF;
+  font-size: 30px;
+}
+</style>
+</head>
+<body>
+<div class="" id="container">
+  <div class="swiperlite">
+    <div class="ul_wrap">
+      <div class="li_item i1" style="background:#DEB408;">
+        0
+      </div>
+      <div class="li_item i1" style="background:#4C3900;">
+        1(all 0 ease)
+      </div>
+      <div class="li_item i2" style="background:#FDEB33;">
+        2
+      </div>
+      <div class="li_item i3" style="background:#F2B749;">
+        3
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+var isTouchMove,startTx,startTy,moveTx,moveTy;
+var eleUlWrap=document.querySelector('.ul_wrap');
+var eleLiItems=eleUlWrap.querySelectorAll('.li_item');
+var numLiItemsLength=eleLiItems.length;
+var numEleWidth=220;
+var strInitEleUlWrapClassName=eleUlWrap.className;
+var numViewWidth=300;
+var eleStartX=-numEleWidth*numLiItemsLength+(numViewWidth-numEleWidth)/2; //-620
+
+eleUlWrap.innerHTML=eleUlWrap.innerHTML+eleUlWrap.innerHTML;
+eleUlWrap.style.width=numEleWidth*numLiItemsLength*2+'px';
+eleUlWrap.style.WebkitTransform='translate3d('+eleStartX+'px,0,0)';
+eleUlWrap.style.transform='translate3d('+eleStartX+'px,0,0)';
+//===================================================
+myTouch(eleUlWrap,function(){ //move
+  console.log('moving');
+  eleUlWrap.style.WebkitTransform='translate3d('+(moveTx-startTx+eleStartX)+'px,0,0)';
+  eleUlWrap.style.transform='translate3d('+(moveTx-startTx+eleStartX)+'px,0,0)';
+},function(){ //mySwipeLeft
+  eleUlWrap.style.WebkitTransform='translate3d('+(eleStartX-numEleWidth)+'px,0,0)';
+  eleUlWrap.style.transform='translate3d('+(eleStartX-numEleWidth)+'px,0,0)';
+  // eleStartX=eleStartX-numEleWidth;
+  var elefirstItem=eleUlWrap.querySelector('.li_item:first-child');
+  var eleLastItem=eleUlWrap.querySelector('.li_item:last-child');
+  window.setTimeout(function(){
+    //動畫結束200ms
+    eleUlWrap.className=strInitEleUlWrapClassName;
+    eleUlWrap.appendChild(elefirstItem);
+    eleUlWrap.style.WebkitTransform='translate3d('+eleStartX+'px,0,0)';
+    eleUlWrap.style.transform='translate3d('+eleStartX+'px,0,0)';
+    // eleStartX=eleStartX-numEleWidth;
+  },200);
+},function(){  //mySwipeRight
+  eleUlWrap.style.WebkitTransform='translate3d('+(eleStartX+numEleWidth)+'px,0,0)';
+  eleUlWrap.style.transform='translate3d('+(eleStartX+numEleWidth)+'px,0,0)';
+  // eleStartX=eleStartX+numEleWidth;
+  // eleUlWrap.dataset.elestartx=-180;
+  var elefirstItem=eleUlWrap.querySelector('.li_item:first-child');
+  var eleLastItem=eleUlWrap.querySelector('.li_item:last-child');
+  // console.log(elefirstItem);
+  // console.log(eleLastItem);
+  window.setTimeout(function(){
+    //動畫結束200ms
+    eleUlWrap.className=strInitEleUlWrapClassName;
+    eleUlWrap.insertBefore(eleLastItem,elefirstItem);
+    eleUlWrap.style.WebkitTransform='translate3d('+eleStartX+'px,0,0)';
+    eleUlWrap.style.transform='translate3d('+eleStartX+'px,0,0)';
+    // eleStartX=eleStartX-numEleWidth;
+  },200);
+});
+//===================================================
+function myTouch(element,MyTouchMove,mySwipeLeft,mySwipeRight){
+//1.start
+  element.addEventListener( 'touchstart', function( e ){
+  var touches = e.touches[0];
+
+  startTx = touches.clientX;
+  startTy = touches.clientY;
+  isTouchMove = false;
+  element.className=strInitEleUlWrapClassName;
+  }, false );
+//2.move
+  element.addEventListener('touchmove', function(e){
+  isTouchMove = true;
+  e.preventDefault();
+  var touches = e.touches[0];
+  moveTx=touches.clientX;
+  moveTy=touches.clientY;
+  MyTouchMove();
+  }, false );
+
+  element.addEventListener('touchend',function(e){
+  element.className+=' ttion';
+  if( !isTouchMove ){
+    return;
+  }
+
+  var touches = e.changedTouches[0],
+    endTx = touches.clientX,
+    endTy = touches.clientY,
+    distanceX = startTx - endTx
+    distanceY = startTy - endTy,
+    isSwipe = false;
+
+  if( Math.abs(distanceX) >= Math.abs(distanceY) ){
+    if( distanceX > 20 ){
+      // console.log( 'fire swipe left event' );
+      mySwipeLeft();
+      isSwipe = true;
+    }
+    else if( distanceX < -20 ){
+      // console.log( 'fire swipe right event' );
+      mySwipeRight();
+      isSwipe = true;
+    }else{
+      //滑動距離小於20
+      element.style.WebkitTransform='translate3d('+eleStartX+'px,0,0)';
+      element.style.transform='translate3d('+eleStartX+'px,0,0)';
+    }
+  }
+  else{
+    if( distanceY > 20 ){
+      console.log( 'fire swipe up event' );
+      isSwipe = true;
+    }
+    else if( distanceY < -20 ){
+      console.log( 'fire swipe down event' );
+      isSwipe = true;
+    }
+    element.style.WebkitTransform='translate3d('+eleStartX+'px,0,0)';
+    element.style.transform='translate3d('+eleStartX+'px,0,0)';
+  }
+
+  if( isSwipe ){
+    // console.log( 'fire swipe event' );
+  }
+  }, false );
+}
+</script>
+</body>
+</html>
